@@ -1,8 +1,11 @@
 import SwiftUI
+import ServiceManagement
 
 struct PopoverView: View {
     @ObservedObject var service: UsageService
     @ObservedObject var historyService: UsageHistoryService
+    @AppStorage("launchAtLoginAsked") private var launchAtLoginAsked = false
+    @State private var showLaunchPrompt = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -17,6 +20,22 @@ struct PopoverView: View {
         }
         .padding()
         .frame(width: 340)
+        .onAppear {
+            if !launchAtLoginAsked {
+                showLaunchPrompt = true
+            }
+        }
+        .alert("Launch at Login?", isPresented: $showLaunchPrompt) {
+            Button("Enable") {
+                setLaunchAtLogin(true)
+                launchAtLoginAsked = true
+            }
+            Button("No Thanks", role: .cancel) {
+                launchAtLoginAsked = true
+            }
+        } message: {
+            Text("Would you like Claude Usage Bar to start automatically when you log in?")
+        }
     }
 
     @ViewBuilder
@@ -113,6 +132,15 @@ struct PopoverView: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
+
+        Toggle("Launch at Login", isOn: Binding(
+            get: { SMAppService.mainApp.status == .enabled },
+            set: { setLaunchAtLogin($0) }
+        ))
+        .toggleStyle(.switch)
+        .controlSize(.mini)
+        .font(.caption)
+        .foregroundStyle(.secondary)
     }
 }
 
@@ -211,6 +239,18 @@ private struct ExtraUsageRow: View {
                     .tint(.blue)
             }
         }
+    }
+}
+
+private func setLaunchAtLogin(_ enabled: Bool) {
+    do {
+        if enabled {
+            try SMAppService.mainApp.register()
+        } else {
+            try SMAppService.mainApp.unregister()
+        }
+    } catch {
+        // Silently ignore — user can toggle again
     }
 }
 
