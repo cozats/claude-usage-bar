@@ -16,6 +16,14 @@ Now it's just a glimpse away — always sitting at the top of your screen.
 ![Swift 5.9](https://img.shields.io/badge/Swift-5.9-orange)
 ![License](https://img.shields.io/badge/license-BSD--2--Clause-green)
 
+## ✨ Improvements in this Fork (cozats)
+
+This fork introduces key security and UX improvements over the original `Blimp-Labs/claude-usage-bar`:
+
+- **🔒 Hardened Security:** OAuth bearer tokens are now securely stored in the **macOS Keychain** rather than in plaintext files. Existing users are seamlessly migrated.
+- **🧹 OAuth Cleanup:** Temporary PKCE states are fully cleared if the OAuth flow is cancelled or fails.
+- **💰 Locale-Aware Currency:** Fixed a bug where extra usage values were incorrectly displayed in minor units (e.g., `2000` instead of `20.00`) and introduced locale-aware currency formatting instead of hard-coded symbols.
+
 ## What it does
 
 A tiny macOS menu bar app that shows your Claude API usage at a glance. Click it for the full picture:
@@ -31,7 +39,7 @@ A tiny macOS menu bar app that shows your Claude API usage at a glance. Click it
 
 ### Download
 
-1. Download `ClaudeUsageBar.zip` from the [latest release](https://github.com/Blimp-Labs/claude-usage-bar/releases/latest)
+1. Download `ClaudeUsageBar.zip` from the [latest release](https://github.com/cozats/claude-usage-bar/releases/latest)
 2. Extract and drag `ClaudeUsageBar.app` to `/Applications`
 3. On first launch: right-click the app → **Open** (required for ad-hoc signed apps)
 
@@ -40,7 +48,7 @@ A tiny macOS menu bar app that shows your Claude API usage at a glance. Click it
 Requires Xcode 15+ / Swift 5.9+ and macOS 14 (Sonoma) or later.
 
 ```sh
-git clone https://github.com/Blimp-Labs/claude-usage-bar.git
+git clone https://github.com/cozats/claude-usage-bar.git
 cd claude-usage-bar
 make app            # build .app bundle
 make install        # copy to /Applications
@@ -59,12 +67,12 @@ Click the icon anytime to see:
 
 ## Data storage
 
-All data is stored locally in `~/.config/claude-usage-bar/`:
+Local data is managed securely:
 
-| File | Purpose |
-|------|---------|
-| `token` | OAuth access token (permissions: `0600`) |
-| `history.json` | Usage history for the chart (30-day retention) |
+| Location | Purpose |
+|----------|---------|
+| **macOS Keychain** | OAuth access token is securely stored in the Keychain. |
+| `~/.config/claude-usage-bar/history.json` | Usage history for the chart (30-day retention) |
 
 History is buffered in memory and flushed to disk every 5 minutes and on app quit. No data is sent anywhere other than the Anthropic API.
 
